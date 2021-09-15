@@ -1,0 +1,4 @@
+# Database configuration
+POSTGRES_USER=uwsgi
+POSTGRES_PASSWORD=RANDOM_PASSWORD
+POSTGRES_DB=uwsgi_data
