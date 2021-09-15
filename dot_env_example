@@ -2,3 +2,6 @@
 POSTGRES_USER=uwsgi
 POSTGRES_PASSWORD=RANDOM_PASSWORD
 POSTGRES_DB=uwsgi_data
+
+# uWSGI Configuration
+UWSGI_FILE=/uwsgi/hello_world.py

@@ -13,4 +13,5 @@ RUN pip install -r /uwsgi/requirements.txt
 
 WORKDIR /uwsgi
 ENV PYTHONPATH=/uwsgi
-CMD ["uwsgi", "--socket", "/var/www/uwsgi/uwsgi.sock", "--chmod-socket=666", "--workers", "4", "--wsgi-file", "/uwsgi/helloworld.py"]
+ENTRYPOINT ["uwsgi", "--socket", "/var/www/uwsgi/uwsgi.sock", "--chmod-socket=666", "--workers", "4", "--logto", "/uwsgi/uwsgi.log", "--wsgi-file"]
+CMD ["/uwsgi/hello_world.py"] 
