@@ -50,3 +50,13 @@ To run an application other than `hello_world.py`, simply edit `UWSGI_FILE` in y
 - Each time you edit your code, you will need to restart the `uwsgi` service. You can do this by either interrupting `docker-compose up` by typing `Control-C`, or you can simply restart `uwsgi` with `docker compose restart uwsgi`.
 - Print statements and fatal exceptions will be logged to the `uwsgi.log` file. Refer to this file when debugging your code.
 - If you want to add CSS files or other static resources, you should store them in the `/static` directory. The `nginx` service will serve these resources.
+- To interactively run database commands, run:
+
+```
+> docker compose exec postgres bash
+# psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"
+```
+
+### References
+
+[WSGI Tutorial](https://wsgi.tutorial.codepoint.net/intro)
