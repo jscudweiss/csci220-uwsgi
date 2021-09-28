@@ -2,6 +2,8 @@
 
 A starter project for Clark's Databases course (CSCI 220). This project includes a web server and database.
 
+**WARNING**: These examples are intended to illustrate the basics of web application programming. The examples are vulnerabile to attacks like [cross site scripting](https://cwe.mitre.org/data/definitions/79.html). Eventually, we will introduce frameworks like [Django](https://www.djangoproject.com) which [incorporate protections against many common attacks](https://docs.djangoproject.com/en/3.2/topics/security/).
+
 Follow these steps to get started:
 
 ## Step 0: Clone This Repository
