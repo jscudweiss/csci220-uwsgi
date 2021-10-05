@@ -15,9 +15,8 @@ def wrapBody(body, title="Blank Title"):
         "</head>\n"
         "<body>\n"
         f"{body}\n"
-        "<p>\n"
         "<hr>\n"
-        f"This page was generated at {time.ctime()}.\n"
+        f"<p>This page was generated at {time.ctime()}.</p>\n"
         "</body>\n"
         "</html>\n"
     )
@@ -29,55 +28,45 @@ def showAllProfiles(conn):
     cursor = conn.cursor()
 
     sql = """
-    SELECT *
+    SELECT id, lastname, firstName, email, activities
     FROM profiles
     """
 
     cursor.execute(sql)
 
-    # get the data from the database:
-    data = cursor.fetchall()
-
     ## create an HTML table for output:
     body = """
     <h2>Profile List</h2>
     <p>
-    
     <table border=1>
       <tr>
         <td><font size=+1"><b>lastname</b></font></td>
         <td><font size=+1"><b>firstname</b></font></td>
         <td><font size=+1"><b>email</b></font></td>
         <td><font size=+1"><b>activities</b></font></td>
+        <td><font size=+1"><b>delete</b></font></td>
       </tr>
     """
 
-    body += "Found %d profiles.<br>" % len(data)
-
-    for row in data:
-
-        # each iteration of this loop creates on row of output:
-        (idNum, lastname, firstName, email, activities) = row
-
-        body += """
-      <tr>
-        <td><a href="?idNum=%s">%s</a></td>
-        <td><a href="?idNum=%s">%s</a></td>
-        <td>%s</td>
-        <td>%s</td>
-      </tr>
-        """ % (
-            idNum,
-            lastname,
-            idNum,
-            firstName,
-            email,
-            activities,
+    count = 0
+    # each iteration of this loop creates on row of output:
+    for idNum, lastname, firstName, email, activities in cursor:
+        body += (
+            "<tr>"
+            f"<td><a href='?idNum={idNum}'>{lastname}</a></td>"
+            f"<td><a href='?idNum={idNum}'>{firstName}</a></td>"
+            f"<td>{email}</td>"
+            f"<td>{activities}</td>"
+            "<td><form method='post' action='miniFacebook.py'>"
+            f"<input type='hidden' NAME='idNum' VALUE='{idNum}'>"
+            '<input type="submit" name="deleteProfile" value="Delete">'
+            "</form></td>"
+            "</tr>\n"
         )
+        count += 1
 
-    body += """
-    </table>
-    """
+    body += "</table>" f"<p>Found {count} profiles.</p>"
+
     return body
 
 
@@ -270,7 +259,7 @@ def getUpdateProfileForm(conn, idNum):
             </td>
         </tr>
     </table>
-    </FORM> 
+    </FORM>
     """ % (
         lastname,
         firstName,
@@ -346,6 +335,17 @@ def processProfileUpdate(conn, idNum, lastname, firstname, email, activities):
     else:
         return "Update Profile Failed."
 
+
+def deleteProfile(conn, idNum):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM profiles WHERE id = %s", (idNum,))
+    conn.commit()
+    if cursor.rowcount > 0:
+        return "Delete Profile Succeeded."
+    else:
+        return "Delete Profile Failed."
+
+
 def get_qs_post(env):
     """
     :param env: WSGI environment
@@ -403,6 +403,9 @@ def application(env, start_response):
         elif "processStatusUpdate" in post:
             messages = post["message"][0]
             body += updateStatusMessage(conn, idNum, messages)
+        elif "deleteProfile" in post:
+            body += deleteProfile(conn, idNum)
+            idNum = None
     ## handle case of adding a profile page:
     elif "addProfile" in post:
         b, idNum = addProfile(

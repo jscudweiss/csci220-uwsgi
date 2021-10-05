@@ -11,5 +11,5 @@ CREATE TABLE status (
     profile_id SERIAL,
     message TEXT,
     dateTime TIMESTAMP,
-    FOREIGN KEY(profile_id) REFERENCES profiles(id)
+    FOREIGN KEY(profile_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
