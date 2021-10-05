@@ -1,4 +1,4 @@
-# Python WSGI Example
+# Python WSGI Examples
 
 A starter project for Clark's Databases course (CSCI 220). This project includes a web server and database.
 
