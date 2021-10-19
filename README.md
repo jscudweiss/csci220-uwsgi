@@ -32,7 +32,7 @@ It is a terrible idea to run software with default passwords. To configure the p
 
 Run:
 ```
-docker-compose up
+docker compose up
 ```
 
 The first time you run it, this command will take a few minutes to complete. This is because Docker needs to download the code for PostgresSQL, etc.
@@ -49,7 +49,7 @@ To run an application other than `hello_world.py`, simply edit `UWSGI_FILE` in y
 
 ### Hints
 
-- Each time you edit your code, you will need to restart the `uwsgi` service. You can do this by either interrupting `docker-compose up` by typing `Control-C`, or you can simply restart `uwsgi` with `docker compose restart uwsgi`.
+- Each time you edit your code, you will need to restart the `uwsgi` service. You can do this by either interrupting `docker compose up` by typing `Control-C`, or you can simply restart `uwsgi` with `docker compose restart uwsgi`.
 - Print statements and fatal exceptions will be logged to the `uwsgi.log` file. Refer to this file when debugging your code.
 - If you want to add CSS files or other static resources, you should store them in the `/static` directory. The `nginx` service will serve these resources.
 - To interactively run SQL commands, run:
@@ -62,14 +62,14 @@ To run an application other than `hello_world.py`, simply edit `UWSGI_FILE` in y
 - To execute SQL commands from a file, run:
 
 ```
-> docker-compose exec postgres bash
+> docker compose exec postgres bash
 # psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --set ON_ERROR_STOP=on --file /postgres_files/db_dump.DATE.sql
 ```
 
 - To dump the SQL commands needed to recreate a database to file, run:
 
 ```
-> docker-compose exec postgres bash
+> docker compose exec postgres bash
 # pg_dump --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --file=/postgres_files/db_dump.DATE.sql
 ```
 
