@@ -45,7 +45,7 @@ Load <http://localhost> and you should see "Hello World".
 
 ## Step 5: Running a Different Application
 
-To run an application other than `hello_world.py`, simply edit `UWSGI_FILE` in your `.env`.
+To run an application other than `hello_world.py`, simply edit `UWSGI_FILE` in your `.env`, then recreate the containers by running `docker compose up`.
 
 ### Hints
 
