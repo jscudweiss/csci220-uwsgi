@@ -7,7 +7,6 @@ import psycopg2
 
 
 def wrapBody(body, title="Blank Title"):
-
     return (
         "<html>\n"
         "<head>\n"
@@ -23,8 +22,6 @@ def wrapBody(body, title="Blank Title"):
 
 
 def showAllProfiles(conn):
-
-    # get a cursor object. cursor object will help us run queries on the database
     cursor = conn.cursor()
 
     sql = """
@@ -71,12 +68,10 @@ def showAllProfiles(conn):
 
 
 def showProfilePage(conn, idNum):
-
     body = """
     <a href="./miniFacebook.py">Return to main page.</a>
     """
 
-    # get a cursor object. cursor object will help us run queries on the database
     cursor = conn.cursor()
 
     sql = """
@@ -86,10 +81,9 @@ def showProfilePage(conn, idNum):
     """
     cursor.execute(sql, (int(idNum),))
 
-    # get the data from the database:
     data = cursor.fetchall()
 
-    ## show profile information
+    # show profile information
     (idNum, lastname, firstName, email, activities) = data[0]
 
     body += """
@@ -112,7 +106,7 @@ def showProfilePage(conn, idNum):
         activities,
     )
 
-    ## provide an update button:
+    # provide an update button:
     body += (
         """
     <FORM METHOD="POST" action="miniFacebook.py">
@@ -123,8 +117,7 @@ def showProfilePage(conn, idNum):
         % idNum
     )
 
-    ## TO DO (1): get and display all status message for this person
-    ## hint: use the status table!
+    # Get and display all status message for this person
     sql = """
     SELECT DateTime, Message
     FROM status
@@ -161,7 +154,7 @@ def showProfilePage(conn, idNum):
     </table>
     """
 
-    ## TO DO (2): add form to let user update their status message
+    # Add form to let user update their status message
     body += (
         """
     <FORM METHOD="POST" action="miniFacebook.py">
@@ -175,9 +168,7 @@ def showProfilePage(conn, idNum):
     return body
 
 
-################################################################################
 def showAddProfileForm():
-
     return """
     <h2>Add A Profile</h2>
     <p>
@@ -210,11 +201,8 @@ def showAddProfileForm():
     """
 
 
-################################################################################
 def getUpdateProfileForm(conn, idNum):
-    ## FIRST, get current data for this profile
-
-    # get a cursor object. cursor object will help us run queries on the database
+    # First, get current data for this profile
     cursor = conn.cursor()
 
     sql = """
@@ -224,10 +212,9 @@ def getUpdateProfileForm(conn, idNum):
     """
     cursor.execute(sql, (idNum,))
 
-    # get the data from the database:
     data = cursor.fetchall()
 
-    ## CREATE A FORM TO UPDATE THIS PROFILE
+    # Create a form to update this profile
     (idNum, lastname, firstName, email, activities) = data[0]
 
     return """
@@ -269,10 +256,7 @@ def getUpdateProfileForm(conn, idNum):
     )
 
 
-################################################################################
 def addProfile(conn, lastName, firstName, email, activities):
-
-    # get a cursor object. cursor object will help us run queries on the database
     cursor = conn.cursor()
 
     sql = "SELECT max(ID) FROM profiles"
@@ -298,10 +282,7 @@ def addProfile(conn, lastName, firstName, email, activities):
     return body, nextID
 
 
-################################################################################
 def updateStatusMessage(conn, idNum, message):
-
-    # get a cursor object. cursor object will help us run queries on the database
     cursor = conn.cursor()
 
     tm = time.localtime()
@@ -318,10 +299,7 @@ def updateStatusMessage(conn, idNum, message):
         return "Failed."
 
 
-################################################################################
 def processProfileUpdate(conn, idNum, lastname, firstname, email, activities):
-
-    # get a cursor object. cursor object will help us run queries on the database
     cursor = conn.cursor()
 
     sql = "UPDATE profiles SET lastname=%s, firstname=%s, email=%s, activities=%s WHERE id = %s"
@@ -386,7 +364,7 @@ def application(env, start_response):
     idNum = None
     if "idNum" in post:
         idNum = post["idNum"][0]
-        ## handle case of starting to do an update -- show the form
+        # handle case of starting to do an update -- show the form
         if "showUpdateProfileForm" in post and "idNum" in post:
             body += getUpdateProfileForm(conn, post["idNum"][0])
         ## handle case of completing an update
@@ -399,14 +377,14 @@ def application(env, start_response):
                 post["email"][0],
                 post["activities"][0],
             )
-        ## handle case of showing a profile page
+        # handle case of showing a profile page
         elif "processStatusUpdate" in post:
             messages = post["message"][0]
             body += updateStatusMessage(conn, idNum, messages)
         elif "deleteProfile" in post:
             body += deleteProfile(conn, idNum)
             idNum = None
-    ## handle case of adding a profile page:
+    # handle case of adding a profile page:
     elif "addProfile" in post:
         b, idNum = addProfile(
             conn,
