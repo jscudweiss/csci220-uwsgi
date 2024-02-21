@@ -17,7 +17,7 @@ services:
     command: ["${UWSGI_FILE}"]
 
   nginx:
-    image: nginx:1.18.0
+    image: nginx:1.25
     ports:
       - "127.0.0.1:80:80"
     restart: unless-stopped
@@ -27,7 +27,7 @@ services:
       - "./nginx/default.development.conf:/etc/nginx/conf.d/default.conf:ro"
 
   postgres:
-    image: postgres:13.1
+    image: postgres:16.1
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
