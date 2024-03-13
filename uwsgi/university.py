@@ -713,4 +713,4 @@ def application(env, start_response):
     body += get_body_content(lambda p: params.get(p, [""])[0], conn)
 
     start_response("200 OK", [("Content-Type", "text/html")])
-    return [wrapBody(body, title="Mini Facebook").encode("utf-8")]
+    return [wrapBody(body, title="University").encode("utf-8")]
