@@ -1,7 +1,7 @@
 docker compose up -d
+
+
 docker compose exec postgres bash
+
+
 psql  --set ON_ERROR_STOP=on --file /postgres_files/university.sql --username="uwsgi" --dbname="uwsgi_data"
-
-
-
-
