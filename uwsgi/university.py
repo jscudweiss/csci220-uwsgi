@@ -46,7 +46,7 @@ def showAllEnrollments(conn, course_number):
     for student_id, student_name in cursor:
         body += (
             "<tr>"
-            f"<td>{student_id}</td>"
+            f"<td><a href='/?action=get_student&student_id={student_id}'>{student_id}</a></td>"
             f"<td>{escape(student_name)}</td>"
             "<td><form method='post' action='/'>"
             f"<input type='hidden' NAME='student_id' VALUE='{student_id}'>"
