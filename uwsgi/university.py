@@ -129,13 +129,13 @@ def showAllCourses(conn):
 
     count = 0
     # each iteration of this loop creates on row of output:
-    for course_number, course_name, room_number, email, activities in cursor:
+    for course_number, course_name, room_number, enrolled, capacity in cursor:
         body += (
             "<tr>"
             f"<td><a href='?action=get_course&course_number={course_number}'>{course_name}</a></td>"
             f"<td><a href='?action=get_room&room_number={room_number}'>{room_number}</a></td>"
-            f"<td>{email}</td>"
-            f"<td>{activities}</td>"
+            f"<td>{enrolled}</td>"
+            f"<td>{capacity}</td>"
             "<td><form method='post' action='/'>"
             f"<input type='hidden' NAME='course_number' VALUE='{course_number}'>"
             f"<input type='hidden' NAME='action' VALUE='delete_course'>"
