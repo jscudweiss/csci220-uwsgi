@@ -23,6 +23,46 @@ def wrapBody(body, title="Blank Title"):
         "</html>\n"
     )
 
+def showAllEnrollments(conn, course_number):
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT enrolled.student, student.name FROM enrolled JOIN student ON student.id = enrolled.student WHERE course=%s", (course_number,))
+
+    ## create an HTML table for output:
+    body = f"""
+    <a href="/">Back to Course List</a>
+    <h2>Enrollment List for {course_number}</h2>
+    <p>
+    <table border=1>
+      <tr>
+        <td><font size=+1"><b>Student ID</b></font></td>
+        <td><font size=+1"><b>Student Name</b></font></td>
+        <td><font size=+1"><b>unenroll</b></font></td>
+      </tr>
+    """
+
+    count = 0
+    # each iteration of this loop creates on row of output:
+    for student_id, student_name in cursor:
+        body += (
+            "<tr>"
+            f"<td>{student_id}</td>"
+            f"<td>{escape(student_name)}</td>"
+            "<td><form method='post' action='/'>"
+            f"<input type='hidden' NAME='student_id' VALUE='{student_id}'>"
+            f"<input type='hidden' NAME='course_number' VALUE='{course_number}'>"
+            f"<input type='hidden' NAME='action' VALUE='delete_enrollment'>"
+            '<input type="submit" name="deleteEnrollment" value="Unenroll">'
+            "</form></td>"
+            "</tr>\n"
+        )
+        count += 1
+
+    body += "</table>" f"<p>Found {count} enrollments in {course_number}.</p>"
+
+    return body
+
+
 def showAllStudents(conn):
     cursor = conn.cursor()
 
@@ -134,7 +174,7 @@ def showAllCourses(conn):
             "<tr>"
             f"<td><a href='?action=get_course&course_number={course_number}'>{course_name}</a></td>"
             f"<td><a href='?action=get_room&room_number={room_number}'>{room_number}</a></td>"
-            f"<td>{enrolled}</td>"
+            f"<td><a href='?action=list_enrollments&course_number={course_number}'>{enrolled}</a></td>"
             f"<td>{capacity}</td>"
             "<td><form method='post' action='/'>"
             f"<input type='hidden' NAME='course_number' VALUE='{course_number}'>"
@@ -167,6 +207,28 @@ def showAddStudentForm():
             <td></td>
             <td>
             <input hidden name="action" value="add_student">
+            <input type="submit" value="Add!">
+            </td>
+        </tr>
+    </table>
+    </FORM>
+    """
+
+def showAddEnrollmentForm(course_number):
+    return f"""
+    <h2>Enroll A Student in {course_number}</h2>
+    <p>
+    <FORM METHOD="POST">
+    <table>
+        <tr>
+            <td>Student ID</td>
+            <td><INPUT TYPE="TEXT" NAME="student_id" pattern="[0-9]+"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+            <input hidden name="course_number" value="{course_number}">
+            <input hidden name="action" value="add_enrollment">
             <input type="submit" value="Add!">
             </td>
         </tr>
@@ -529,6 +591,27 @@ def addStudent(conn, student_id, student_name):
     else:
         return "Add Student Failed."+ delayed_redirect("/?action=list_students")
 
+def addEnrollment(conn, student_id, course_number):
+    cursor = conn.cursor()
+
+    redir_back_url = f"/?action=list_enrollments&course_number={course_number}"
+
+    sql = "INSERT INTO enrolled VALUES (%s,%s)"
+    params = (student_id, course_number)
+
+    try: 
+        cursor.execute(sql, params)
+        conn.commit()
+    except psycopg2.errors.UniqueViolation:
+        return f"Add Enrollment Failed: student is already enrolled."+ delayed_redirect(redir_back_url)
+    except psycopg2.errors.ForeignKeyViolation:
+        return f"Add Enrollment Failed: make sure student ID is correct."+ delayed_redirect(redir_back_url)
+
+    if cursor.rowcount > 0:
+        return "Add Enrollment Succeeded." + delayed_redirect(redir_back_url, 0)
+    else:
+        return "Add Enrollment Failed."+ delayed_redirect(redir_back_url)
+
 
 
 def addCourse(conn, course_name, course_number, course_room):
@@ -561,6 +644,21 @@ def deleteRoom(conn, room_number):
         return "Delete Room Succeeded." + delayed_redirect("/?action=list_rooms", 0)
     else:
         return "Delete Room Failed." + delayed_redirect("/?action=list_rooms")
+
+
+def deleteEnrollment(conn, student_id, course_number):
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM enrolled WHERE student = %s AND course = %s", (student_id, course_number))
+        conn.commit()
+    except psycopg2.errors.ForeignKeyViolation:
+        pass
+    
+    if cursor.rowcount > 0:
+        return "Delete Enrollment Succeeded." + delayed_redirect(f"/?action=list_enrollments&course_number={course_number}", 0)
+    else:
+        return "Delete Enrollment Failed." + delayed_redirect(f"/?action=list_enrollments&course_number={course_number}")
+
 
 
 def deleteStudent(conn, student_id):
@@ -675,6 +773,15 @@ def get_body_content(get_param, conn):
         )
     elif action == "delete_student":
         return deleteStudent(conn, get_param("student_id"))
+    elif action == "add_enrollment":
+        return addEnrollment(conn, get_param("student_id"), get_param("course_number"))
+    elif action == "list_enrollments":
+        return (
+            showAllEnrollments(conn, get_param("course_number"))
+            + showAddEnrollmentForm(get_param("course_number"))
+        )
+    elif action == "delete_enrollment":
+        return deleteEnrollment(conn, get_param("student_id"), get_param("course_number"))
     # If an action was specified which is invalid
     else:
         return "Error 404: page not found or could not be rendered."
